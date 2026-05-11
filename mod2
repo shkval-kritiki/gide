@@ -1,0 +1,56 @@
+заходим в >_ Консоль xterm.js
+root
+toor
+apt-get update && apt-get install git -y
+git clone https://github.com/Difonchik/demoES
+cd demoES/module2/
+chmod 777 ./*
+			ISP
+./03_chrony_server_setup.sh
+./09_proxy_setup.sh
+			HQ-RTR
+./03_chrony_server_setup.sh
+./08_sshd_setup.sh
+./10_port_forwarding.sh
+			BR-RTR
+./03_chrony_server_setup.sh
+./08_sshd_setup.sh
+./10_port_forwarding.sh
+			BR-SRV
+vim /etc/resolv.conf
+nameserver 192.168.1.10
+./01_samba_setup.sh
+./03_chrony_server_setup.sh
+./08_sshd_setup.sh
+			HQ-SRV
+./02_raid_setup.sh
+./11_nfs_setup.sh
+			hq-cli
+vim /etc/resolv.conf
+	nameserver 192.168.3.10
+		   192.168.1.10
+kinit administrator@AU-TEAM.IRPO
+P@ssw0rd
+Меню
+Поиск
+acc
+Центр управления системой
+Аутентификация
+*Домен active Directory
+Домен: AU-TEAM.IRPO
+Рабочая группа: AU-TEAM
+P@ssw0rd
+control libnss-role
+roleadd hq wheel
+rolelst
+vim /etc/sudoers
+Cmnd_Alias SHELLCMD = /bin/cat, /bin/grep, /usr/bin/id
+WHEEL_USERS ALL=(ALL:ALL) SHELLCMD
+./03_chrony_server_setup.sh
+./08_sshd_setup.sh
+./11_nfs_setup.sh
+			BR-SRV	
+./05_ansible_setup.sh		yes
+./06_docker_setup.sh
+
+
