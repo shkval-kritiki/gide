@@ -1,0 +1,86 @@
+заходим в >_ Консоль xterm.js
+root
+toor
+apt-get update && apt-get install git -y
+git clone https://github.com/Difonchik/demoES
+cd demoES/module1/
+chmod 777 ./*
+./run_all.sh
+
+**ISP**
+hostnamectl hostname isp
+exec bash
+Устанавливаем скриптик!!
+mcedit /etc/resolv.conf 
+	nameserver 192.168.100.2
+
+**HQ-RTR**
+hostnamectl hostname hq-rtr
+exec bash
+vim /etc/net/ifaces/enp7s1/options			(что бы выйти esc shift+: wq! enter)
+	static
+echo 172.16.1.2/28 > /etc/net/ifaces/enp7s1/ipv4address
+echo default via 172.16.1.1 > /etc/net/ifaces/enp7s1/ipv4route
+systemctl restart network
+vim /etc/resolv.conf					(что бы выйти esc shift+: wq! enter)
+	nameserver 8.8.8.8
+Установка скрипта!!
+mcedit /etc/resolv.conf 				(что бы выйти esc shift+: wq! enter)all.shi
+	nameserver 192.168.100.2
+
+**BR-RTR**
+hostnamectl hostname br-rtr
+vim /etc/net/ifaces/enp7s1/options			(что бы выйти esc shift+: wq! enter)
+	static вместо дхцп
+echo 172.16.2.2/28 > /etc/net/ifaces/enp7s1/ipv4address
+echo default via 172.16.2.1 > /etc/net/ifaces/enp7s1/ipv4route
+systemctl restart network
+vim /etc/resolv.conf					(что бы выйти esc shift+: wq! enter)
+	nameserver 8.8.8.8
+Установка скрипта!!!!
+vim /etc/resolv.conf					(что бы выйти esc shift+: wq! enter)
+nameserver 192.168.100.2
+
+**HQ-SRV**
+проставить tag100 в оборудовании proxmox
+hostnamectl hostname hq-srv
+
+vim /etc/net/ifaces/enp7s1/options			(что бы выйти esc shift+: wq! enter)
+	static
+echo 192.168.100.2/27 > /etc/net/ifaces/enp7s1/ipv4address
+echo default via 192.168.100.1 > /etc/net/ifaces/enp7s1/ipv4route
+systemctl restart network
+vim /etc/resolv.conf					(что бы выйти esc shift+: wq! enter)
+	nameserver 8.8.8.8
+Установка скрипта!!!
+systemctl stop firewalld
+удалить лишниее в файле /etc/bind/rfc1912.conf
+systemctl restart bind
+vim /etc/resolv.conf					(что бы выйти esc shift+: wq! enter)
+nameserver 192.168.100.2
+
+**BR-SRV**
+hostnamectl hostname br-srv
+vim /etc/net/ifaces/enp7s1/options
+	static
+echo 172.20.10.2/28 > /etc/net/ifaces/enp7s1/ipv4address
+echo default via 172.20.10.1 > /etc/net/ifaces/enp7s1/ipv4route
+systemctl restart network
+vim /etc/resolv.conf
+	nameserver 8.8.8.8
+Установка скрипта!!!
+systemctl stop firewalld
+mcedit /etc/resolv.conf
+	nameserver 192.168.100.2
+
+**HQ-CLI**
+hostnamectl hostname hq-cli
+systemctl stop firewalld
+vim /etc/resolv.conf
+nameserver 8.8.8.8
+Установка скрипта!!!
+vim /etc/resolv.conf					(что бы выйти esc shift+: wq! enter)
+	nameserver 192.168.100.2 
+
+
+
