@@ -46,7 +46,7 @@ MaxAuthTries 2
 PermitRootLogin no
 AllowUsers sshuser
 0.9 proxy setup
-ip, domenname
+ip, domenname пользователь
 10 port fordating
 ip, port
 11 nfs setup
