@@ -139,6 +139,7 @@ cd demoES4/module2/
 chmod 777 ./*
 ./03_chrony_server_setup.sh
 ./09_proxy_setup.sh
+в прокси надо зайти vim ./09_proxy_setup.sh и там отредактировать имя Erofeyc, а то там сломано
 			HQ-RTR
 apt-get update && apt-get install git -y
 git clone https://github.com/Difonchik/demoES4
