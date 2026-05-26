@@ -1,0 +1,419 @@
+apt-get install bash-completion -y
+apt-get install mc nano -y
+					ISP				
+hostnamectl hostname isp.au-team.irpo
+mkdir /etc/net/ifaces/enp7s2
+cp -r /etc/net/ifaces/enp7s1/options /etc/net/ifaces/enp7s2/options
+vim /etc/net/ifaces/enp7s2/options
+
+BOOTPROTO=static
+TYPE=eth
+
+cp -r /etc/net/ifaces/enp7s2/options /etc/net/ifaces/enp7s3/options
+echo 172.16.70.1/28 > /etc/net/ifaces/enp7s2/ipv4address
+echo 172.16.80.1/28 > /etc/net/ifaces/enp7s3/ipv4address
+systemctl restart network
+vim /etc/net/sysctl.conf															
+	forwarding = 1
+apt-get update
+apt-get install firewalld -y
+systemctl enable --now firewalld
+firewall-cmd --permanent --add-masquerade
+firewall-cmd --permanent --add-interface=enp7s1 --zone=public
+firewall-cmd --permanent --add-interface=enp7s2 --zone=trusted
+firewall-cmd --permanent --add-interface=enp7s3 --zone=trusted
+firewall-cmd --reload
+
+			HQ-Rtr
+hostnamectl hostname hq-rtr.au-team.irpo
+exec bash
+vim /etc/net/ifaces/enp7s1/options
+
+BOOTPROTO=static
+TYPE=eth
+			
+echo 172.16.70.2/28 > /etc/net/ifaces/enp7s1/ipv4address
+echo default via 172.16.70.1 /etc/net/ifaces/enp7s1/ipv4route
+mkdir /etc/net/ifaces/enp7s2
+cp -r /etc/net/ifaces/enp7s1/options /etc/net/ifaces/enp7s2/options
+mkdir /etc/net/ifaces/enp7s2.{114,214}
+vim /etc/net/ifaces/enp7s2.114/options
+
+TYPE=vlan
+HOST=enp7s2
+VID=114
+DISABLED=no
+
+vim /etc/net/ifaces/enp7s2.214/options
+	
+TYPE=vlan
+HOST=enp7s2
+VID=214
+DISABLED=no
+
+echo 192.168.114.1/27 > /etc/net/ifaces/enp7s2.114/ipv4address	
+echo 192.168.214.1/28 > /etc/net/ifaces/enp7s2.214/ipv4address
+systemctl restart network
+apt-get update
+apt-get install firewalld -y
+vim /etc/net/sysctl.conf															
+	forwarding = 1
+systemctl enable --now firewalld
+firewall-cmd --permanent --add-masquerade
+firewall-cmd --permanent --add-protocol=ospf
+firewall-cmd --permanent --add-service=gre
+firewall-cmd --permanent --add-protocol=gre
+firewall-cmd --permanent --add-service=dns
+firewall-cmd --permanent --add-port=53/tcp
+firewall-cmd --permanent --add-port=53/udp
+firewall-cmd --reload
+
+			>>>>>>>>>>>>>>>DHCP<<<<<<<<<<<<<<<<<
+apt-get install dhcp-server
+systemctl enable --now dhcpd
+vim /etc/sysconfig/dhcpd
+	DHCPDARGS=enp7s2.214
+cp -r /etc/dhcp/dhcpd.conf.example /etc/dhcp/dhcpd.conf
+vim /etc/dhcp/dhcpd.conf
+subnet 192.168.214.0 netmask 255.255.255.240 {
+range 192.168.214.2 192.168.214.14;
+option domain-name-servers 77.88.8.8, 192.168.114.2;
+option domain-name "au-team.irpo";
+option routers 192.168.214.1;
+default-lease-time 600;
+max-lease-time 7200;
+}
+systemctl restart dhcpd
+
+			BR-RTR
+
+hostnamectl hostname br-rtr.au-team.irpo
+vim /etc/net/ifaces/enp7s1/options
+
+BOOTPROTO=static
+TYPE=eth
+			
+echo 172.16.80.2/28 > /etc/net/ifaces/enp7s1/ipv4address
+echo default via 172.16.80.1 > /etc/net/ifaces/enp7s1/ipv4route
+mkdir /etc/net/ifaces/enp7s2
+cp -r /etc/net/ifaces/enp7s1/options /etc/net/ifaces/enp7s2/options
+echo 172.20.10.1/28 > /etc/net/ifaces/enp7s2/ipv4address 
+systemctl restart network
+apt-get update
+
+apt-get install bash-completion -y
+apt-get install mc nano -y
+
+apt-get install firewalld -y
+vim /etc/net/sysctl.conf															
+	forwarding = 1
+systemctl enable --now firewalld
+firewall-cmd --permanent --add-masquerade
+firewall-cmd --permanent --add-service=gre
+firewall-cmd --permanent --add-protocol=gre
+firewall-cmd --permanent --add-protocol=ospf
+firewall-cmd --permanent --add-service=dns
+firewall-cmd --permanent --add-port=53/tcp
+firewall-cmd --permanent --add-port=53/udp
+firewall-cmd --reload
+		>>>>>>>>>>>>>>>>>>GRE<<<<<<<<<<<<<<<													
+		(hq-rtr)
+gre1
+mkdir /etc/net/ifaces/gre1
+vim /etc/net/ifaces/gre1/options	
+
+TUNLOCAL=172.16.1.2
+TUNREMOTE=172.16.2.2
+TUNTYPE=gre
+TYPE=iptun
+TUNTTL=64
+TUNMTU=1478
+TUNOPTIONS='ttl 64'
+DISABLE=no
+
+echo 10.10.10.1/30 > /etc/net/ifaces/gre1/ipv4address	
+systemctl restart network
+		(br-rtr)
+gre1
+mkdir /etc/net/ifaces/gre1
+vim /etc/net/ifaces/gre1/options
+
+TUNLOCAL=172.16.2.2
+TUNREMOTE=172.16.1.2
+TUNTYPE=gre
+TYPE=iptun
+TUNTTL=64
+TUNMTU=1478
+TUNOPTIONS='ttl 64'
+DISABLE=no
+
+echo 10.10.10.2/30 > /etc/net/ifaces/gre1/ipv4address	
+systemctl restart network
+
+			HQ-SRV
+hostnamectl hostname hq-srv.au-team.irpo
+vim /etc/net/ifaces/enp7s1/options
+
+BOOTPROTO=static
+TYPE=eth
+			
+echo 192.168.114.2/27 > /etc/net/ifaces/enp7s1/ipv4address
+echo default via 192.168.114.1 > /etc/net/ifaces/enp7s1/ipv4route
+systemctl restart network
+
+			HQ-CLI
+hostnamectl hostname hq-cli.au-team.irpo
+	dhcp
+systemctl restart network
+			BR-SRV
+hostnamectl hostname br-srv.au-team.irpo
+vim /etc/net/ifaces/enp7s1/options
+
+BOOTPROTO=static
+TYPE=eth
+			
+echo 172.20.10.2/28 > /etc/net/ifaces/enp7s1/ipv4address
+echo default via 172.20.10.1 > /etc/net/ifaces/enp7s1/ipv4route
+systemctl restart network
+			>>>>>>>>OSPF<<<<<<<<<<
+		(HQ-RTR)
+
+apt-get install frr
+systemctl enable --now frr
+vim /etc/frr/daemons
+	ospfd=yes
+
+systemctl restart frr
+vtysh
+conf t
+router ospf
+passive-interface default
+network 10.10.10.0/30 area 0 (gre1)
+network 192.168.114.0/27 area 0 (vlan114)
+network 192.168.214.0/28 area 0 (vlan214)
+log-adjacency-changes
+exit
+interface enp7s2.114
+no ip ospf passive
+interface enp7s2.214
+no ip ospf passive
+interface gre1
+no ip ospf passive
+ip ospf authentication
+ip ospf authentication-key P@ssw0rd
+end
+wr
+exit
+systemctl restart frr
+
+		(BR-RTR)
+
+apt-get install frr
+systemctl enable --now frr
+mcedit /etc/frr/daemons
+		ospfd=yes
+
+systemctl restart frr
+vtysh
+conf t
+router ospf
+passive-interface default
+network 10.10.10.0/30 area 0 (gre1)
+network 172.20.10.0/28 area 0 (enp7s2)
+log-adjacency-changes
+exit
+interface gre1
+no ip ospf passive
+ip ospf authentication
+ip ospf authentication-key P@ssw0rd
+interface enp7s2
+no ip ospf passive
+end
+wr
+exit
+systemctl restart frr
+			
+
+				>>>>>>>>>>>>>DNS<<<<<<<<<<<<
+				HQ-SRV 192.168.114.2/27
+apt-get install bind
+systemctl enable --now bind
+vim /etc/bind/options.conf
+	listen-on { any; };		раскоментить(6 заком)
+	forwarders { 8.8.8.8; };	раскоментить
+	dnssec-validation no;		записать
+	allow-query { any; };		раском
+cp /etc/bind/zone/localhost /etc/bind/zone/au-team.irpo
+cp /etc/bind/zone/127.in-addr.arpa /etc/bind/zone/db.au-team.irpo
+cp /etc/bind/zone/127.in-addr.arpa /etc/bind/zone/db1.au-team.irpo
+vim /etc/bind/zone/au-team.irpo
+
+$TTL	1D
+@	IN	SOA	au-team.irpo. root.au-team.irpo. (
+				2025110500	; serial
+				12H		; refresh
+				1H		; retry
+				1W		; expire
+				1H		; ncache
+			)
+	IN	NS	au-team.irpo.
+	IN	A	192.168.114.2
+hq-srv	IN	A	192.168.114.2
+hq-cli	IN	A	192.168.214.2
+hq-rtr	IN	A	192.168.214.1
+hq-rtr	IN	A	192.168.114.1
+br-srv	IN	A	172.20.10.2
+br-rtr	IN	A	172.20.10.1
+docker	IN	A	172.16.1.1
+web	IN	A	172.16.2.1
+
+vim /etc/bind/zone/db.au-team.irpo
+
+$TTL    1D
+@       IN      SOA     au-team.irpo. root.au-team.irpo. (
+                                2025110500      ; serial
+                                12H             ; refresh
+                                1H              ; retry
+                                1W              ; expire
+                                1H              ; ncache
+                        )
+        IN      NS      au-team.irpo.
+1       IN      PTR     hq-rtr.au-team.irpo.
+2       IN      PTR     hq-srv.au-team.irpo.
+
+vim /etc/bind/zone/db1.au-team.irpo
+
+$TTL    1D
+@       IN      SOA     au-team.irpo. root.au-team.irpo. (
+                                2025110500      ; serial
+                                12H             ; refresh
+                                1H              ; retry
+                                1W              ; expire
+                                1H              ; ncache
+                        )
+        IN      NS      au-team.irpo.
+1       IN      PTR     hq-rtr.au-team.irpo.
+2       IN      PTR     hq-cli.au-team.irpo.
+
+vim /etc/bind/rfc1912.conf						
+zone "au-team.irpo" {
+	type master;
+	file "au-team.irpo";
+	allow-update { none; };
+};
+zone "114.168.192.in-addr.arpa" {
+	type master;
+	file "db.au-team.irpo";
+	allow-update { none; };
+};
+zone "214.168.192.in-addr.arpa" {
+	type master;
+	file "db1.au-team.irpo";
+	allow-update { none; };
+};
+chmod 777 /etc/bind/zone/db1.au-team.irpo
+chmod 777 /etc/bind/zone/db.au-team.irpo
+chmod 777 /etc/bind/zone/au-team.irpo
+systemctl restart bind
+vim /etc/resolv.conf
+
+nameserver 192.168.114.2
+nameserver 172.20.10.2
+
+apt-get update
+apt-get install bind-utils
+nslookup au-team.irpo
+	>>>>>>>>>>>>>>>>>настройка пользователей (sshuser и net_admin)<<<<<<<<<<<<<<<<
+							(HQ-SRV)
+useradd sshuser
+passwd sshuser
+P@ssw0rd
+P@ssw0rd 
+usermod -aG wheel sshuser
+usermod -u 2014 sshuser
+id sshuser (инфа по пользователю)
+vim /etc/sudoers
+расскоментировать: WHELL_USERS ALL=(all:all) NOPASSWD: ALL 
+написать под "WHELL_USERS ALL=(all:all) NOPASSWD: ALL" sshuser ALL=(ALL:ALL) NOPASSWD: ALL
+
+							(BR-SRV)
+useradd sshuser
+passwd sshuser
+P@ssw0rd
+P@ssw0rd 
+usermod -aG wheel sshuser
+usermod -u 2014 sshuser
+id sshuser (инфа по пользователю)
+vim /etc/sudoers
+расскоментировать: WHELL_USERS ALL=(all:all) NOPASSWD: ALL 
+написать под "WHELL_USERS ALL=(all:all) NOPASSWD: ALL" sshuser ALL=(ALL:ALL) NOPASSWD: ALL
+su sshuser
+sudo -i
+exit
+exit
+
+							(HQ-RTR)
+useradd net_admin
+passwd net_admin
+P@ssw0rd
+P@ssw0rd 
+usermod -aG wheel net_admin
+vim /etc/sudoers ЕСЛИ файла нет: apt-get install sudo 
+расскоментировать: WHELL_USERS ALL=(all:all) NOPASSWD: ALL 
+написать под "WHELL_USERS ALL=(all:all) NOPASSWD: ALL" net_admin ALL=(ALL:ALL) NOPASSWD: ALL
+su net_admin
+sudo -i
+exit
+exit
+							(BR-RTR)
+useradd net_admin
+passwd net_admin
+P@ssw0rd
+P@ssw0rd 
+usermod -aG wheel net_admin
+vim /etc/sudoers ЕСЛИ файла нет: apt-get install sudo 
+расскоментировать: WHELL_USERS ALL=(all:all) NOPASSWD: ALL 
+написать под "WHELL_USERS ALL=(all:all) NOPASSWD: ALL" net_admin ALL=(ALL:ALL) NOPASSWD: ALL
+su net_admin
+sudo -i
+exit
+exit
+
+						SSH
+				(hq-srv)
+vim /etc/openssh/sshd_config
+	Port 2014			раском
+	AllowUsers sshuser		вписать
+	PermitRootLogin no		раскоментировать
+	MaxAuthTries 2			раском
+	Banner /banner.txt		раском снизу 
+touch /banner.txt
+vim /banner.txt
+	Authorizied access only
+	сюда ентер
+systemctl restart sshd
+ssh -p 2014 sshuser@localhost
+ssh -p 2014 user@localhost
+exit
+
+				(br-srv)
+vim /etc/openssh/sshd_config
+	Port 2014			раском
+	AllowUsers sshuser		вписать
+	MaxAuthTries 2			раском
+	Banner /banner.txt		раском снизу 
+touch /banner.txt
+vim /banner.txt
+	Authorizied access only
+	сюда ентер
+systemctl restart sshd
+ssh -p 2014 sshuser@localhost
+ssh -p 2014 user@localhost
+exit
+
+hq-cli
+ssh -p 2014 sshuser@192.168.114.2 (172.20.10.2)
+
+
+
+
