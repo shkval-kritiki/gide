@@ -103,6 +103,7 @@ mcedit /etc/resolv.conf
 **HQ-CLI**
 проставить tag213 в оборудовании proxmox
 hostnamectl hostname hq-cli
+если нет дхцп адреса, то перезапустить dhcpd на HQ-rtr systemctl restart dhcpd
 vim /etc/resolv.conf
 nameserver 8.8.8.8
 Установка скрипта!!!
