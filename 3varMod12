@@ -11,6 +11,11 @@ chmod 777 ./*
 hostnamectl hostname isp
 exec bash
 Устанавливаем скриптик!!
+apt-get update && apt-get install git -y
+git clone https://github.com/Difonchik/demoES3
+cd demoES3/module1/
+chmod 777 ./*
+./run_all.sh
 mcedit /etc/resolv.conf 
 	nameserver 192.168.113.2
 
@@ -25,6 +30,11 @@ systemctl restart network
 vim /etc/resolv.conf					(что бы выйти esc shift+: wq! enter)
 	nameserver 8.8.8.8
 Установка скрипта!!
+apt-get update && apt-get install git -y
+git clone https://github.com/Difonchik/demoES3
+cd demoES3/module1/
+chmod 777 ./*
+./run_all.sh
 mcedit /etc/resolv.conf 				(что бы выйти esc shift+: wq! enter)
 	nameserver 192.168.113.2
   
@@ -38,6 +48,11 @@ systemctl restart network
 vim /etc/resolv.conf					(что бы выйти esc shift+: wq! enter)
 	nameserver 8.8.8.8
 Установка скрипта!!!!
+apt-get update && apt-get install git -y
+git clone https://github.com/Difonchik/demoES3
+cd demoES3/module1/
+chmod 777 ./*
+./run_all.sh
 vim /etc/resolv.conf					(что бы выйти esc shift+: wq! enter)
 nameserver 192.168.113.2
 
@@ -53,7 +68,13 @@ systemctl restart network
 vim /etc/resolv.conf					(что бы выйти esc shift+: wq! enter)
 	nameserver 8.8.8.8
 Установка скрипта!!!
+apt-get update && apt-get install git -y
+git clone https://github.com/Difonchik/demoES3
+cd demoES3/module1/
+chmod 777 ./*
+./run_all.sh
 systemctl stop firewalld
+systemctl disable firewalld
 удалить лишниее в файле /etc/bind/rfc1912.conf
 systemctl restart bind
 vim /etc/resolv.conf					(что бы выйти esc shift+: wq! enter)
@@ -69,17 +90,27 @@ systemctl restart network
 vim /etc/resolv.conf
 	nameserver 8.8.8.8
 Установка скрипта!!!
+apt-get update && apt-get install git -y
+git clone https://github.com/Difonchik/demoES3
+cd demoES3/module1/
+chmod 777 ./*
+./run_all.sh
 systemctl stop firewalld
+systemctl disable firewalld
 mcedit /etc/resolv.conf
 	nameserver 192.168.113.2
 
 **HQ-CLI**
 проставить tag213 в оборудовании proxmox
 hostnamectl hostname hq-cli
-systemctl stop firewalld
 vim /etc/resolv.conf
 nameserver 8.8.8.8
 Установка скрипта!!!
+apt-get update && apt-get install git -y
+git clone https://github.com/Difonchik/demoES3
+cd demoES3/module1/
+chmod 777 ./*
+./run_all.sh
 vim /etc/resolv.conf					(что бы выйти esc shift+: wq! enter)
 	nameserver 192.168.113.2 
                                   *******************2MOD************************
