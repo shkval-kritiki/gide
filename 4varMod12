@@ -202,9 +202,5 @@ WHEEL_USERS ALL=(ALL:ALL) SHELLCMD
 ./11_nfs_setup.sh
 скачать яндекс браузер без смс и регистрации
 			BR-SRV
-apt-get update && apt-get install git -y
-git clone https://github.com/Difonchik/demoES4
-cd demoES4/module2/
-chmod 777 ./*
 ./05_ansible_setup.sh		yes
 ./06_docker_setup.sh
