@@ -154,6 +154,7 @@ nameserver 192.168.1.10*
 			HQ-SRV
 ./02_raid_setup.sh
 ./11_nfs_setup.sh
+./07
 			hq-cli
 vim /etc/resolv.conf
 	nameserver 192.168.3.10
