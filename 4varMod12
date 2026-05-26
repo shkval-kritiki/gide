@@ -144,6 +144,7 @@ chmod 777 ./*
 ./08_sshd_setup.sh
 ./10_port_forwarding.sh
 			BR-SRV
+может не пойти инет, в ресолв 8.8.8.8 ставь
 apt-get update && apt-get install git -y
 git clone https://github.com/Difonchik/demoES4
 cd demoES4/module2/
