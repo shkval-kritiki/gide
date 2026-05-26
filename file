@@ -1,0 +1,53 @@
+***************************************************1 МОДУЛЬ*************************************************************************
+0.0 unit system
+ip адреса
+0.1 network setup
+ip
+0.2 firewall setup
+порты
+0.3 gre tunnel
+0.4 ospf setup
+ip vlan 
+0.5 dhcp setup
+ip
+0.6 dns setup
+ip
+0.7 user setup
+id, port ssh
+0.8 ssh setup
+port /etc/openssh/sshd_config, username
+Port 2026 раском
+AllowUsers sshuser вписать
+PermitRootLogin no раскоментировать
+MaxAuthTries 2 раском
+Banner /banner.txt
+***********************************************МОДУЛЬ 2*****************************************
+0.1 samba setup
+0.2 raid setup
+username, (разделы) сам рейд 0 5 
+0.3 chrony server setup
+ip стратум 
+0.5 ansible setup
+ip, port
+0.6 docker setup
+(mkdir testapp) password)
+DB_TYPE: maria
+DB_HOST: db
+DB_NAME: testdb**1234**
+DB_PORT: меняется 808**1234**
+DB_USER: test**1234**c
+DB_PASS: P@ssw0rd и т д, айпи адрес по которому можно зайти на докер надо посмотреть*
+0.7 webstack setup
+ ip 
+0.8 sshd setup
+port, username,
+Port 2026
+MaxAuthTries 2
+PermitRootLogin no
+AllowUsers sshuser
+0.9 proxy setup
+ip, domenname
+10 port fordating
+ip, port
+11 nfs setup
+ip
