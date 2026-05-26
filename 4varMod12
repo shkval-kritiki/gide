@@ -173,6 +173,7 @@ chmod 777 ./*
 ./02_raid_setup.sh
 ./11_nfs_setup.sh
 ./07
+./08
 			hq-cli
 apt-get update && apt-get install git -y
 git clone https://github.com/Difonchik/demoES4
