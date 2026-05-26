@@ -155,6 +155,7 @@ nameserver 192.168.1.10*
 ./02_raid_setup.sh
 ./11_nfs_setup.sh
 ./07
+./08
 			hq-cli
 vim /etc/resolv.conf
 	nameserver 192.168.3.10
