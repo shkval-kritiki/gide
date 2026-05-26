@@ -135,28 +135,52 @@ git clone https://github.com/Difonchik/demoES3
 cd demoES3/module2/
 chmod 777 ./*
 			ISP
+apt-get update && apt-get install git -y
+git clone https://github.com/Difonchik/demoES3
+cd demoES3/module2/
+chmod 777 ./*
 ./03_chrony_server_setup.sh
 ./09_proxy_setup.sh
 			HQ-RTR
+apt-get update && apt-get install git -y
+git clone https://github.com/Difonchik/demoES3
+cd demoES3/module2/
+chmod 777 ./*
 ./03_chrony_server_setup.sh
 ./08_sshd_setup.sh
 ./10_port_forwarding.sh
 			BR-RTR
+apt-get update && apt-get install git -y
+git clone https://github.com/Difonchik/demoES3
+cd demoES3/module2/
+chmod 777 ./*
 ./03_chrony_server_setup.sh
 ./08_sshd_setup.sh
 ./10_port_forwarding.sh
 			BR-SRV
+apt-get update && apt-get install git -y
+git clone https://github.com/Difonchik/demoES3
+cd demoES3/module2/
+chmod 777 ./*
 vim /etc/resolv.conf
 nameserver 192.168.1.10*
 ./01_samba_setup.sh
 ./03_chrony_server_setup.sh
 ./08_sshd_setup.sh
 			HQ-SRV
+apt-get update && apt-get install git -y
+git clone https://github.com/Difonchik/demoES3
+cd demoES3/module2/
+chmod 777 ./*
 ./02_raid_setup.sh
 ./11_nfs_setup.sh
 ./07
 ./08
 			hq-cli
+apt-get update && apt-get install git -y
+git clone https://github.com/Difonchik/demoES3
+cd demoES3/module2/
+chmod 777 ./*
 vim /etc/resolv.conf
 	nameserver 192.168.3.10
 		   192.168.1.10
