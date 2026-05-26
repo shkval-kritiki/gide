@@ -74,6 +74,7 @@ cd demoES4/module1/
 chmod 777 ./*
 ./run_all.sh
 systemctl stop firewalld
+systemctl disable firewalld
 удалить лишниее в файле /etc/bind/rfc1912.conf
 systemctl restart bind
 vim /etc/resolv.conf					(что бы выйти esc shift+: wq! enter)
@@ -120,26 +121,50 @@ git clone https://github.com/Difonchik/demoES4
 cd demoES4/module2/
 chmod 777 ./*
 			ISP
+apt-get update && apt-get install git -y
+git clone https://github.com/Difonchik/demoES4
+cd demoES4/module2/
+chmod 777 ./*
 ./03_chrony_server_setup.sh
 ./09_proxy_setup.sh
 			HQ-RTR
+apt-get update && apt-get install git -y
+git clone https://github.com/Difonchik/demoES4
+cd demoES4/module2/
+chmod 777 ./*
 ./03_chrony_server_setup.sh
 ./08_sshd_setup.sh
 ./10_port_forwarding.sh
 			BR-RTR
+apt-get update && apt-get install git -y
+git clone https://github.com/Difonchik/demoES4
+cd demoES4/module2/
+chmod 777 ./*
 ./03_chrony_server_setup.sh
 ./08_sshd_setup.sh
 ./10_port_forwarding.sh
 			BR-SRV
+apt-get update && apt-get install git -y
+git clone https://github.com/Difonchik/demoES4
+cd demoES4/module2/
+chmod 777 ./*
 vim /etc/resolv.conf
 nameserver 192.168.1.10*
 ./01_samba_setup.sh
 ./03_chrony_server_setup.sh
 ./08_sshd_setup.sh
 			HQ-SRV
+apt-get update && apt-get install git -y
+git clone https://github.com/Difonchik/demoES4
+cd demoES4/module2/
+chmod 777 ./*
 ./02_raid_setup.sh
 ./11_nfs_setup.sh
 			hq-cli
+apt-get update && apt-get install git -y
+git clone https://github.com/Difonchik/demoES4
+cd demoES4/module2/
+chmod 777 ./*
 vim /etc/resolv.conf
 	nameserver 192.168.3.10
 		   192.168.1.10
@@ -164,6 +189,10 @@ WHEEL_USERS ALL=(ALL:ALL) SHELLCMD
 ./08_sshd_setup.sh
 ./11_nfs_setup.sh
 скачать яндекс браузер без смс и регистрации
-			BR-SRV	
+			BR-SRV
+apt-get update && apt-get install git -y
+git clone https://github.com/Difonchik/demoES4
+cd demoES4/module2/
+chmod 777 ./*
 ./05_ansible_setup.sh		yes
 ./06_docker_setup.sh
