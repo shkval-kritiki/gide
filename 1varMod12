@@ -196,6 +196,7 @@ WHEEL_USERS ALL=(ALL:ALL) SHELLCMD
 /etc/hosts 
 172.16.2.1 web.au-team.irpo
 172.16.1.1 docker.au-team.irpo
+перезугрузить что бы заходили в hq-user
 			BR-SRV	
 ./05_ansible_setup.sh		yes
 ./06_docker_setup.sh
