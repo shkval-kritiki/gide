@@ -20,3 +20,98 @@ services:
     restart: always
     environment:
       POSTGRES_DB: testdb4
+*************************************************ЭТО СКРИПТ 06*********************
+#!/bin/bash
+echo "=== Начало настройки Docker ==="
+
+HOSTNAME=$(hostname -s)
+
+if [[ "$HOSTNAME" != "br-srv" ]]; then
+    echo "Docker настраивается только на br-srv (текущий хост: $HOSTNAME)"
+    exit 0
+fi
+
+echo "=== Установка Docker ==="
+apt-get update
+apt-get install -y docker-engine docker-compose
+systemctl enable --now docker
+
+echo "=== Монтирование Additional.iso ==="
+mkdir -p /mnt/add_cd
+if mount | grep -q /mnt/add_cd; then
+    echo "Уже смонтировано в /mnt/add_cd"
+else
+    if mount /dev/sr0 /mnt/add_cd 2>/dev/null; then
+        echo "Смонтировано /dev/sr0"
+    elif mount /dev/cdrom /mnt/add_cd 2>/dev/null; then
+        echo "Смонтировано /dev/cdrom"
+    else
+        echo "ОШИБКА: не удалось смонтировать Additional.iso"
+        exit 1
+    fi
+fi
+
+echo "=== Копирование Docker образов ==="
+if [ ! -d /mnt/add_cd/docker ]; then
+    echo "ОШИБКА: директория docker не найдена на ISO"
+    exit 1
+fi
+cp -r /mnt/add_cd/docker/ /root/docker
+
+echo "=== Загрузка Docker образов ==="
+docker image load -i /root/docker/site_latest.tar
+docker image load -i /root/docker/postgres_latest.tar   # изменено
+docker images
+
+echo "=== Создание и запуск Docker-стека ==="
+mkdir -p /root/site
+cd /root/site
+
+mkdir -p /root/site/db_data
+chown -R 999:999 /root/site/db_data
+
+cat > docker-compose.yaml << 'EOF'
+services:
+  site:
+    image: site:latest
+    container_name: site
+    restart: always
+    depends_on:
+      - db
+    ports:
+      - "8084:8000"
+    environment:
+      DB_TYPE: postgres
+      DB_HOST: db
+      DB_NAME: testdb4
+      DB_PORT: 5432
+      DB_USER: test4
+      DB_PASS: P@ssw0rd
+  db:
+    image: postgres:latest
+    container_name: db
+    restart: always
+    environment:
+      POSTGRES_DB: testdb4
+      POSTGRES_USER: test4
+      POSTGRES_PASSWORD: P@ssw0rd
+    volumes:
+      - /root/site/db_data:/var/lib/postgres/data
+volumes:
+  db_data:
+EOF
+
+docker compose up -d
+
+echo "=== Ожидание запуска PostgreSQL (до 60 секунд) ==="
+for i in $(seq 1 30); do
+    if docker exec db pg_isready -U test4 -d testdb4 2>/dev/null; then
+        echo "PostgreSQL запущена!"
+        break
+    fi
+    echo "Ожидание запуска PostgreSQL... ($i/30)"
+    sleep 2
+done
+
+echo "=== Готово! Приложение доступно по адресу http://192.168.3.10:8084 ==="
+docker ps
