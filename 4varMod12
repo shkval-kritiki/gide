@@ -203,6 +203,9 @@ WHEEL_USERS ALL=(ALL:ALL) SHELLCMD
 ./03_chrony_server_setup.sh
 ./08_sshd_setup.sh
 ./11_nfs_setup.sh
+vim /etc/hosts
+172.16.2.1 web.au-team.irpo
+172.16.1.1 docker.au-team.irpo
 скачать яндекс браузер без смс и регистрации
 			BR-SRV
 ./05_ansible_setup.sh		yes
