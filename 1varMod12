@@ -193,6 +193,9 @@ WHEEL_USERS ALL=(ALL:ALL) SHELLCMD
 ./08_sshd_setup.sh
 ./11_nfs_setup.sh
 скачать яндекс браузер без смс и регистрации
+/etc/hosts 
+172.16.2.1 web.au-team.irpo
+172.16.1.1 docker.au-team.irpo
 			BR-SRV	
 ./05_ansible_setup.sh		yes
 ./06_docker_setup.sh
