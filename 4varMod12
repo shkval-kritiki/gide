@@ -1,3 +1,4 @@
+curl -s https://raw.githubusercontent.com/Difonchik/demoES4/refs/heads/main/download_scripts_all.sh | bash
 заходим в >_ Консоль xterm.js
 root
 toor
