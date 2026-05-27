@@ -1,0 +1,22 @@
+services:
+  site:
+    image: site:latest
+    container_name: site
+    restart: always
+    depends_on:
+      - db
+    ports:
+      - "8084:8000"
+    environment:
+      DB_TYPE: postgres
+      DB_HOST: db
+      DB_NAME: testdb4
+      DB_PORT: 5432
+      DB_USER: test4
+      DB_PASS: P@ssw0rd
+  db:
+    image: postgres:latest
+    container_name: db
+    restart: always
+    environment:
+      POSTGRES_DB: testdb4
