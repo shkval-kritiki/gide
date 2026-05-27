@@ -1,0 +1,428 @@
+		ISP 	
+172.16.1.1/28
+172.16.1.1/28
+		hq-rtr
+172.16.1.10/28
+192.168.1.1/27
+192.168.2.1/28
+		br-rtr
+172.16.2.10/28
+192.168.3.1/28
+		hq-srv
+192.168.1.10/27
+		hq-cli
+192.168.2.10/28
+		br-srv
+192.168.3.10/28
+
+			samba
+	(br-srv)
+vim /etc/resolv.conf
+apt-get update
+apt-get install task-samba-dc -y
+rm -rf /etc/samba/smb.conf
+samba-tool domain provision
+entrs
+entrs
+entrs
+entrs
+P@ssw0rd
+cp /var/lib/samba/private/krb5.conf /etc/krb5.conf
+systemctl enable --now samba
+vim /etc/samba/smb.conf
+	interfaces = lo enp7s1
+	bind interfaces only = yes
+systemctl restart samba
+mcedit /etc/resolv.conf
+	nameserver 192.168.3.10
+	nameserver 192.168.1.10
+samba-tool domain info 192.168.3.10
+kinit administrator@AU-TEAM.IRPO
+P@ssw0rd
+hq-cli
+mcedit /etc/resolv.conf
+	nameserver 192.168.3.10
+kinit administrator@AU-TEAM.IRPO
+P@ssw0rd
+Меню
+Поиск
+acc
+Центр управления системой
+Аутентификация
+*Домен active Directory
+Домен: AU-TEAM.IRPO
+Рабочая группа: AU-TEAM
+P@ssw0rd
+
+			Пользователи
+	br-srv
+samba-tool user create hquser1
+P@ssw0rd
+samba-tool user create hquser2
+P@ssw0rd
+samba-tool user create hquser3
+P@ssw0rd
+samba-tool user create hquser4
+P@ssw0rd
+samba-tool user create hquser5
+P@ssw0rd
+
+samba-tool user list
+samba-tool group add hq
+samba-tool group addmembers hq hquser1
+samba-tool group addmembers hq hquser2
+samba-tool group addmembers hq hquser3
+samba-tool group addmembers hq hquser4
+samba-tool group addmembers hq hquser5
+
+	hq-cli
+apt-get update
+kinit administrator@AU-TEAM.IRPO
+P@ssw0rd
+vim /etc/sudoers
+%hq ALL=(ALL:ALL) NOPASSWD: /bin/cat,/bin/grep,/usr/bin/id
+
+			raid
+	hq-srv
+lsblk
+mdadm --create /dev/md0 --level=0 --raid-device=2 /dev/sdb /dev/sdc
+mdadm --detail --scan > /etc/mdadm.conf
+fdisk /dev/md0
+n
+p
+en
+en
+en
+w
+lsblk /dev/md0
+mkfs.ext4 /dev/md0p1
+mkdir /raid
+mount /dev/md0p1 /raid/
+lsblk
+systemctl --force --full edit raid.mount
+
+[Unit]
+Description=Mount RAID
+
+[Mount]
+What=/dev/md0p1
+Where=/raid
+Type=ext4
+Options=defaults
+
+[Install]
+WantedBy=multi-user.target
+
+systemctl enable --now raid.mount
+mount -a
+df -h
+reboot
+df -h
+			NFS
+		HQ-SRV
+apt-get install nfs-server -y
+mkdir /raid/nfs
+chmod 777 /raid/nfs
+vim /etc/exports
+	/raid/nfs *(rw,no_subtree_check)
+exprotfs -a
+systyemctl enable --now nfs-server
+systemctl status nfs-server
+		HQ-CLI
+apt-get install nfs-clients -y
+mkdir /mnt/nfs
+systemctl --force --full edit mnt-nfs.mount
+	
+[Unit]
+Description=Mount NFS
+[Mount]
+What=192.168.1.10:/raid/nfs
+Where=/mnt/nfs
+Type=nfs
+Options=_netdev,auto
+[Install]
+WantedBy=multi-user.target
+
+systemctl enable --now mnt-nfs.mount
+mount -a
+df -h
+
+			CHRONY
+		isp
+apt-get update
+apt-get install chrony
+vim /etc/chrony.conf
+	server ntp5.ntp-server.net iburst prefer	заменить
+	local stratum 5					вписать
+	allow 0.0.0.0/0					вписать
+	#rtcsync					заком
+systemctl restart chronyd
+chronyc sources
+		hq-rtr
+vim /etc/chrony.conf
+	#pool				заком
+	server 172.16.1.1 iburst	добавить
+	#rtcsync			заком
+systemctl restart chronyd
+chronyc sources
+		hq-srv
+vim /etc/chrony.conf
+	#pool				заком
+	server 172.16.1.1		добавить
+	#rtcsync			заком
+systemctl restart chronyd
+chronyc sources
+		hq-cli
+vim /etc/chrony.conf
+	#pool				заком
+	server 172.16.1.1		добавить
+	#rtcsync			заком
+systemctl restart chronyd
+chronyc sources
+		br-rtr
+vim /etc/chrony.conf
+	#pool				заком
+	server 172.16.2.1		добавить
+	#rtcsync			заком
+systemctl restart chronyd
+chronyc sources
+		br-srv
+vim /etc/chrony.conf
+	#pool				заком
+	server 172.16.2.1		добавить
+	#rtcsync			заком
+systemctl restart chronyd
+chronyc sources
+		
+			ANSIBLE
+		hq-rtr
+vim /etc/openssh/sshd_config
+	Port 2026			раском
+	MaxAuthTries 2			раском
+	PermitRootLogin no		раском
+	AllowUsers net_admin		добавить
+systemctl restart sshd
+		br-rtr
+mcedit /etc/openssh/sshd_config
+	Port 2026
+	MaxAuthTries 2
+	PermitRootLogin no
+	AllowUsers net_admin
+systemctl restart sshd
+		hq-cli
+useradd sshuser -u 2026
+passwd sshuser
+usermod -aG wheel sshuser 
+vim /etc/sudoers
+	WHEEL_USERS ALL=(ALL:ALL) NOPASSWD: ALL		раском
+vim /etc/openssh/sshd_config
+	Port 2026
+	MaxAuthTries 2
+	PermitRootLogin no
+	AllowUsers sshuser
+systemctl restart sshd
+	br-srv
+apt-get install ansible -y
+vim /etc/ansible/hosts
+	[clients]
+	hq-rtr ansible_host=192.168.1.1 ansible_user=net_admin ansible_port=2026
+	br-rtr ansible_host=192.168.3.10 ansible_user=net_admin ansible_port=2026
+	hq-srv ansible_host=192.168.1.10 ansible_user=sshuser ansible_port=2026
+	hq-cli ansible_host=192.168.2.10 ansible_user=sshuser ansible_port=2026
+hq-rtr
+br-rtr_
+firewall-cmd --permanent --add-port=2026/udp
+firewall-cmd --permanent --add-port=2026/tcp
+firewall-cmd --reload
+
+ssh-keygen
+ssh-copy-id net_admin@192.168.1.1 -p 2026
+ssh-copy-id net_admin@192.168.3.10 -p 2026
+ssh-copy-id sshuser@192.168.1.10 -p 2026
+ssh-copy-id sshuser@192.168.2.10 -p 2026
+mcedit /etc/ansbile/ansible.cfg
+	interpreter_python = python3
+ansible all -m ping 
+
+			DOCKER
+br-srv
+apt-get install docker-engine docker-compose -y
+systemctl enable --now docker
+mkdir /mnt/add_cd
+добавить CD/DVD SCSI local Additional (SCSI не заработает если есть CD/DVD IDE alt-server)
+mount /dev/sr0 /mnt/add_cd/
+cp -r /mnt/add_cd/docker/ ~/docker
+docker image load -i /root/docker/site_latest.tar
+docker image load -i /root/docker/mariadb_latest.tar
+docker images
+mkdir testapp
+cd testapp/
+vim docker-compose.yaml
+services:
+  testapp: 
+    image: site:latest
+    container_name: testapp
+    restart: always
+    depends_on:
+      - db
+    ports:
+      - 8080:8000
+    environment:
+      DB_TYPE: maria
+      DB_HOST: db
+      DB_NAME: testdb
+      DB_PORT: 3306
+      DB_USER: testc
+      DB_PASS: P@ssw0rd
+  db:
+    image: mariadb:latest
+    container_name: db
+    restart: always
+    environment:
+      DB_NAME: testdb
+      DB_USER: testc
+      DB_PASS: P@ssw0rd
+      MARIADB_ROOT_PASSWORD: P@ssw0rd
+    volumes:  
+      - /root/testapp/db_data:/var/lib/mysql
+volumes:
+  db_data:
+netstat -tulnp | grep 8080
+kill (циферка гулие если есть)
+docker compose up -d 
+docker ps
+docker exec -it mariadb -u root -p
+P@ssw0rd
+CREATE DATABASE testdb;
+CREATE USER 'testc'@'%' IDENTIFIED BY 'P@ssw0rd';
+GRANT ALL PRIVILEGES ON testdb.* TO 'testc'@'%';
+FLUSH PRIVILEGES;
+exit
+hq-cli
+http://192.168.3.10:8080
+
+
+
+				apache maria db
+			hq-srv
+mcedit /etc/resolv.conf
+	nameserver 192.168.100.2
+apt-get update
+apt-get install apache2 -y
+apt-get install mariadb -y
+apt-get install php8.2 apache2-mod_php8.2 php8.2-mysqli -y
+systemctl enable --now httpd2
+systemctl enable --now mariadb
+добавить SCSI local ADDitional (SCSI не заработает если есть CD/DVD IDE alt-server)
+mkdir /mnt/add_cd
+mount /dev/sr0 /mnt/add_cd/
+ls -lah /mnt/add_cd/
+cp -r /mnt/add_cd/web/ /root/web
+mysql_secure_installation
+ent
+ent
+y
+y
+P@ssw0rd
+y
+y
+y
+y
+mysql
+CREATE DATABASE webdb;
+exit
+mysql webdb < /root/web/dump.sql
+cat /root/web/dump.sql
+mysql
+CREATE USER 'webc'@'%' IDENTIFIED BY 'P@ssw0rd';
+GRANT ALL PRIVILEGES ON webdb.* TO 'webc'@'%';
+FLUSH PRIVILEGES;
+exit
+mcedit /root/web/index.php
+	username = "webc"
+	password = "P@ssw0rd"
+	dbname = "webdb"
+cp /root/web/index.php /var/www/html/
+rm -f /var/www/html/index.html
+cp /root/web/logo.png /var/www/html/logo.png
+a2enmod mod_php8.2
+systemctl restart httpd2
+			hq-cli
+http://192.168.1.10
+
+rm -f /usr/share/doc/indexhtml/index.html (если выводит стратовую страницу апача, то надо зайти и удалить файл index.html)
+				ПРОБРОС ПОРТОВ
+HQ-RTR
+где  172.16.1.10 - адрес HQ-RTR 
+     192.168.1.10 - адрес HQ-SRV
+
+ nft add chain ip nat PREROUTING { type nat hook prerouting priority 0 \; }
+ nft add rule ip nat PREROUTING ip daddr 172.16.1.10 tcp dport 8080 dnat to 192.168.1.10:80
+ nft add rule ip nat PREROUTING ip daddr 172.16.1.10 tcp dport 2026 dnat to 192.168.1.10:2026
+
+Сохранить правило
+nft list ruleset > /etc/nftables/nftables.nft
+
+BR-RTR
+где  172.16.2.10 - адрес BR-RTR 
+     192.168.3.10 - адрес BR-SRV
+
+nft add chain ip nat PREROUTING { type nat hook prerouting priority 0 \; }
+nft add rule ip nat PREROUTING ip daddr 172.16.2.10 tcp dport 8080 dnat to 192.168.3.10:8080
+nft add rule ip nat PREROUTING ip daddr 172.16.2.10 tcp dport 2026 dnat to 192.168.3.10:2026
+
+Сохранить правило
+nft list ruleset > /etc/nftables/nftables.nft
+
+				PROXY	
+			ISP
+apt-get install -y nginx
+vim /etc/nginx/sites-available.d/default.conf
+
+server {
+	listen 80;
+	server_name web.au-team.irpo;
+
+	location / {
+		proxy_pass http://172.16.1.10:80;
+		proxy_set_header Host $host;
+		proxy_set_header X-Real-IP $remote_addr;
+		proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for; 
+		proxy_set_header X-Forwarded-Proto $scheme;
+		auth_basic "Restricted area";
+		auth_basic_user_file /etc/nginx/.htpasswd;
+	}
+}
+
+server {
+	listen 80;
+	server_name docker.au-team.irpo;
+
+	location / {
+		proxy_pass http://172.16.2.10:8080;
+		proxy_set_header Host $host;
+		proxy_set_header X-Real-IP $remote_addr;
+		proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+		proxy_set_header X-Forwarded-Proto $scheme;
+	}
+}
+
+
+ln -s /etc/nginx/sites-available.d/default.conf /etc/nginx/sites-enabled.d/
+systemctl enable --now nginx
+hq-cli
+/etc/hosts
+172.16.1.1 web.au-team.irpo
+172.16.2.10 docker.au-team.irpo
+172.16.2.1 docker.au-team.irpo
+
+
+
+
+
+
+	
+
+
+
+
